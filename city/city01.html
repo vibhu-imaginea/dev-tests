@@ -1,0 +1,87 @@
+<!--Basic creation of city with light, shadow, fog-->
+<html>
+<head>
+    <title>City 0.1</title>
+    <style>
+    </style>
+</head>
+<body>
+<script src="../ext/three.js"></script>
+
+<script>
+    var camera, scene, renderer;
+    function setup() {
+        document.body.style.backgroundColor = '#d7f0f7';
+        setupThreeJS();
+        setupWorld();
+        requestAnimationFrame(function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+        });
+    }
+    function setupThreeJS() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth /window.innerHeight, 1, 10000);
+        camera.position.y = 600;
+        camera.position.z = 600;
+        camera.rotation.x = -45 * Math.PI / 180;
+        renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+        renderer.shadowMapSoft = true;
+        document.body.appendChild(renderer.domElement);
+    }
+    function setupWorld() {
+        // Light
+        var light = new THREE.DirectionalLight(0xf6e86d, 1);
+        light.castShadow = true;
+        light.shadowDarkness = 0.5;
+        light.shadowMapWidth = 2048;
+        light.shadowMapHeight = 2048;
+        //light.shadowCameraVisible = true;
+        light.shadowCameraFar = 2500;
+
+        light.shadowCameraLeft = -1000;
+        light.shadowCameraRight = 1000;
+        light.shadowCameraTop = 1000;
+        light.shadowCameraBottom = -1000;
+        light.position.set(500,1500,1000);
+        //light.position.set(.1,.1,.1);
+        scene.add(light);
+
+        // Fog
+        scene.fog = new THREE.FogExp2(0x9db3b5, 0.001);
+
+        // Floor
+        var geo = new THREE.PlaneGeometry(2000, 2000, 20, 20);
+        var mat = new THREE.MeshBasicMaterial({color: 0x9db3b5, overdraw:true});
+        var floor = new THREE.Mesh(geo, mat);
+        floor.rotation.x = -90 * Math.PI / 180;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // Original building
+        var geometry = new THREE.CubeGeometry(1, 1, 1);
+        geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5,0));
+        var material = new THREE.MeshPhongMaterial({overdraw: true, color: 0xcccccc});
+
+        // Cloned buildings
+        for (var i = 0; i < 150; i++) {
+            var building = new THREE.Mesh(geometry.clone(), material.clone());
+            building.position.x = Math.floor(Math.random() * 200 - 100) * 4;
+            building.position.z = Math.floor(Math.random() * 200 - 100) * 4;
+            building.scale.x = Math.random() * 50 + 10;
+            building.scale.y = Math.random() * building.scale.x * 8 + 8;
+            building.scale.z = building.scale.x;
+            building.castShadow = true;
+            building.receiveShadow = true;
+            scene.add(building);
+        }
+    }
+    // Run it!
+    setup();
+
+</script>
+
+</body>
+</html>
